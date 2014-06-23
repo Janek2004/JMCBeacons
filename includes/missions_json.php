@@ -63,7 +63,8 @@ wp_reset_postdata();
 			$args;
 			if($id===NULL){
 				$args = array(
-					'post_type' => 'Station'
+					'post_type' => 'Station',
+					'post_status' => 'publish'
 				);			
 			}
 			else{
