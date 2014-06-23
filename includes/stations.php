@@ -36,6 +36,7 @@ class Station{
 	public static function getStationsForBeacon($beacon){
 		$args= array(
 				'post_type'=>'Station',
+				'post_status' => 'publish',
 				'meta_query' => array(
         array(
             'key' => Station::$associated_beacon_key,
@@ -53,7 +54,7 @@ class Station{
 	}
 	
 	public static function getJSONRepresentation($station){
-		print_r($station);
+		//print_r($station);
 		//station needs to be Post type
 			$json_string = '{';
 					$json_string=$json_string.'"id":"'.$station->ID.'",';

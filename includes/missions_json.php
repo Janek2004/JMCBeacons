@@ -6,7 +6,6 @@ header('Content-Type: application/json');
 			$beacon_id = $_REQUEST['beacon_uuid'];	//get uuid
 			$beacon_major =$_REQUEST['beacon_major']; //get major
 			$beacon_minor =$_REQUEST['beacon_minor']; //get minor
-		
 			$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
 		
 			if(count($array)>0){
@@ -36,19 +35,17 @@ header('Content-Type: application/json');
 	//var_dump($missions);
 	
 	foreach ($missions->posts as $mission){
-							$stations = getStationsForMission($mission->ID);
-						echo '{"name":"'.$mission->post_title.'",';
-						echo '"stations":';
-						//stations
-						echo $stations;
-						echo ',"id":"'.$mission->ID.'"}';	
-						if($counter!=$record_count-1){						
-							echo ",";
-						}
-						$counter++;
-						
+						$stations = getStationsForMission($mission->ID);
+							echo '{"name":"'.$mission->post_title.'",';
+							echo '"id":"'.$mission->ID.'",';
+							echo '"stations":';
+							echo $stations;
+							echo '}';	
+							if($counter!=$record_count-1){						
+								echo ",";
+							}
+							$counter++;	
 				}
-				
 	
 ?>]}
 <?php }
@@ -68,38 +65,37 @@ wp_reset_postdata();
 				);			
 			}
 			else{
-							$args = array(
-						'post_type' => 'Station',
-						'meta_key'=>Station::$station_parent_id_key,
-						'meta_value'=>$id
+				$args = array(
+				'post_type' => 'Station',
+				'meta_key'=>Station::$station_parent_id_key,
+				'meta_value'=>$id,
+				'post_status' => 'publish'
 				
 				);		
 			}
+	
 
-		$stations = new WP_Query( $args );		
+		$stations = new WP_Query( $args );	
+	
 		$json_string = '[';
 		$record_count = $stations->post_count;
 		$counter = 0;
 		
 		if($stations ->have_posts()):
 			foreach($stations->posts as $station):
-					$json_string=$json_string."{";
-						$json_string=$json_string.'"id":"'.$station->ID.'",';
-						$json_string=$json_string.'"name":"'.$station->title.'",';
-						$json_string=$json_string.'"immediate_message":"'.$station_object->getImmediateMessage($station->ID).'",';
-						$json_string=$json_string.'"nearby_message":"'.$station_object->getNearbyMessage($station->ID).'"';
-					
-						$json_string=$json_string."}";
-						if($counter != $record_count-1){
-							$json_string=$json_string.",";	
-						 }
+					$json_string= $json_string.Station::getJSONRepresentation($station);
+					if($counter != $record_count-1){
+					 	$json_string=$json_string.",";	
+				 }
 				$counter++;
 			endforeach;	
 		endif;
 		$json_string = $json_string.']';
 		
 		return $json_string;
-	}
+		
+		
+}
 	
 	
 
