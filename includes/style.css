@@ -1,0 +1,161 @@
+@charset "UTF-8";
+/* CSS Document */
+
+.site{
+	     max-width: 100% !important;
+			 height: 100%; 
+			 display: table;
+}
+
+.award_main-content
+{
+		   -webkit-box-shadow: 1px 1px 4px 0px rgba(0,0,0,0.49);
+			-moz-box-shadow: 1px 1px 4px 0px rgba(0,0,0,0.49);
+			 box-shadow: 1px 1px 4px 0px rgba(0,0,0,0.49);
+			 overflow:auto;
+			 max-width: 80% !important;
+			 margin:auto !important;
+			 height:100% !important;
+}
+
+.award_site-content{
+	padding:10px;
+	
+}
+
+.wp_badger_extended_post-thumbnail{
+	width:170px;
+	height:170px;
+	background-color:transparent;
+	border-style:solid;
+	background:#FF3;
+	border-top-left-radius:15px;
+	border-top-right-radius:15px;
+	border-bottom-left-radius:0px;
+	border-bottom-right-radius:0px;
+	border-bottom:none;
+	text-align:center;
+	vertical-align:middle;
+	display: table-cell;
+} 
+	
+	
+.allround{
+	border-bottom-left-radius:15px;
+	border-bottom-right-radius:15px;
+}
+	
+.wp_badger_extended_post-thumbnail img{
+	 margin:auto !important;  
+}
+
+.wp_badger_extended_post_gallery-thumbnail{
+	width:170px;
+}
+
+/*.wp_badger_extended_post_gallery-thumbnail */
+#wp_badger_extended_gridcontainer .wp_badger_extended_post-thumbnail{
+
+}
+.wp_badger_extended_badge_gallery_name{ 
+	/*border-style:solid;
+	border-width:1px; */
+	border-bottom-left-radius:15px;
+	border-bottom-right-radius:15px;
+	background:#090;
+	text-align:center;
+}
+
+.wp_badger_extended_badge_gallery_name a{
+	color:white;
+	height:30px;
+}
+
+/*Customizing Gallery Page*/
+.wp_badger_extended_h3{
+	padding:5px;
+	color:white;
+}
+.wp_badger_extended_p{
+	padding:5px;
+	color:white;
+}
+
+
+.wp_badger_extended_badge_issuer_info
+{
+	display:block;
+	float:left;
+	width:50%;
+	min-height:220px;
+}
+
+.griditemleft{float: left;  margin: 5px 10px 10px 0;}
+
+#wp_badger_extended_gridcontainer{margin:auto; width: 90%;  padding:10px;}
+#wp_badger_extended_gridcontainer h2 a{color: #77787a; font-size: 13px;}
+#wp_badger_extended_gridcontainer .griditemleft{float: left;  margin: 0 10px 10px 0; min-height: 220px;}
+#wp_badger_extended_gridcontainer .postimage{margin: 0 0 10px 0;}
+
+.wp_badger_extended_button{
+
+	-webkit-border-top-left-radius:20px;
+	-moz-border-radius-topleft:20px;
+	border-top-left-radius:20px;
+	-webkit-border-top-right-radius:20px;
+	-moz-border-radius-topright:20px;
+	border-top-right-radius:20px;
+	-webkit-border-bottom-right-radius:20px;
+	-moz-border-radius-bottomright:20px;
+	border-bottom-right-radius:20px;
+	-webkit-border-bottom-left-radius:20px;
+	-moz-border-radius-bottomleft:20px;
+	border-bottom-left-radius:20px;
+	text-indent:0;
+	
+	display:inline-block;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	font-style:normal;
+	height:40px;
+	line-height:40px;
+	width:136px;
+	text-decoration:none;
+	text-align:center;
+	text-shadow:1px 1px 0px #810e05;
+}
+.wp_badger_extended_button:hover red {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #c62d1f), color-stop(1, #f24537) );
+	background:-moz-linear-gradient( center top, #c62d1f 5%, #f24537 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#c62d1f', endColorstr='#f24537');
+	background-color:#c62d1f;
+}.wp_badger_extended_button:active {
+	position:relative;
+	top:1px;
+}
+
+.red{
+	-moz-box-shadow:inset 0px 1px 0px 0px #f5978e;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #f5978e;
+	box-shadow:inset 0px 1px 0px 0px #f5978e;
+   background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f24537), color-stop(1, #c62d1f) );
+	 background:-moz-linear-gradient( center top, #f24537 5%, #c62d1f 100% );
+	 filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f24537', endColorstr='#c62d1f');
+	 background-color:#f24537;
+	 border:1px solid #d02718;	
+}
+
+.green{ 
+	-moz-box-shadow:inset 0px 1px 0px 0px #d9fbbe;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #d9fbbe;
+	box-shadow:inset 0px 1px 0px 0px #d9fbbe;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #b8e356), color-stop(1, #a5cc52) );
+	background:-moz-linear-gradient( center top, #b8e356 5%, #a5cc52 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#b8e356', endColorstr='#a5cc52');
+	background-color:#b8e356;
+	background-color:#9dce2c;
+}
+
+
