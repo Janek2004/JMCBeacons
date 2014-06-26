@@ -373,7 +373,7 @@ function station_message_meta_box($post,$meta) {
 
 					<?php }
 					else{
-							echo '<a href="'.$attachment_url.'">'.$attachment_url.' </a>';
+							echo '<a href="'.$attachment_url.'" target="_blank">'.$attachment_url.' </a>';
 						}
 					
 					

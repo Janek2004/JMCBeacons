@@ -21,7 +21,7 @@ function missions_post_type() {
 	
 		'description'         => __( 'iBeacons Missions', 'text_domain' ),
 		'labels'              => $labels,
-		'supports'            => array( ),
+		'supports'            => array('title','editor','thumbnail'),
 		'taxonomies'          => array( 'category', 'post_tag' ),
 		'hierarchical'        => false,
 		'public'              => true,
