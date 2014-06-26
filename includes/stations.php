@@ -360,10 +360,24 @@ function station_message_meta_box($post,$meta) {
 	if(!empty($meta_attachment_ids[0])){
 					foreach($meta_attachment_ids[0] as $att_id){
 							$attachment_url = wp_get_attachment_url($att_id);		
+						   $type = get_post_mime_type($att_id);
+							 
 							 ?>
-<br />
-<input type="checkbox" name="<?php echo $metaid; ?>_delete_image_attachment_radio[]" value="<?php echo $att_id;?>" />
-<img alt="Attachment" src="<?php echo $attachment_url;?>" alt="" style="max-width:200px;" /><br />
+					 <br />
+					<input type="checkbox" name="<?php echo $metaid; ?>_delete_image_attachment_radio[]" value="<?php echo $att_id;?>" />
+					 
+					<?php  if ($type ==='image/jpeg' || $type ==='image/png')
+						{
+					 ?> 				
+							<img alt="Attachment" src="<?php echo $attachment_url;?>" alt="" style="max-width:200px;" /><br />
+
+					<?php }
+					else{
+							echo '<a href="'.$attachment_url.'">'.$attachment_url.' </a>';
+						}
+					
+					
+					    ?>
 <?php
 						}
 	}
