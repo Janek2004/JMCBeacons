@@ -10,7 +10,7 @@ class iBeacon{
     	'meta_query' => array(
         array(
             'key' => iBeacon::$JMC_UUID,
-            'value' => 223,
+            'value' => $uuid,
 						'compare'=>'LIKE' 
         ),
         array(
