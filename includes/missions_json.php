@@ -1,12 +1,14 @@
 <?php global $post;
 header('Content-Type: application/json');
 	//get all missions
-	if(isset($_REQUEST['beacon_uuid'])){
-		
-			$beacon_id = $_REQUEST['beacon_uuid'];	//get uuid
-			$beacon_major =$_REQUEST['beacon_major']; //get major
-			$beacon_minor =$_REQUEST['beacon_minor']; //get minor
-			$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
+	if(isset($_REQUEST['action'])){
+			
+			if($_REQUEST['action']==="getData"){
+	
+				$beacon_id = $_REQUEST['beacon_uuid'];	//get uuid
+				$beacon_major =$_REQUEST['beacon_major']; //get major
+				$beacon_minor =$_REQUEST['beacon_minor']; //get minor
+				$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
 		
 			if(count($array)>0){
 		
@@ -22,37 +24,48 @@ header('Content-Type: application/json');
 				
 				}
 			}
-			//based on the id information display message and information		
+		 }//based on the id information display message and information		
+		 	if($_REQUEST['action']==="getMissions"){
+		 			?>
+		 {"missions":[
+  			<?php
+					$record_count = $missions->post_count;
+					$counter = 0;
+					//echo $count;
+					//var_dump($missions);
+					
+					foreach ($missions->posts as $mission){
+										$stations = getStationsForMission($mission->ID);
+											echo '{"name":"'.$mission->post_title.'",';
+											echo '"id":"'.$mission->ID.'",';
+											echo '"stations":';
+											echo $stations;
+											echo '}';	
+											if($counter!=$record_count-1){						
+												echo ",";
+											}
+											$counter++;	
+								}
+	
+					?>]}
+     
+ <?php
+			}
+			if($_REQUEST['action']==="saveBeacon"){
+						$beacon_id = $_REQUEST['beacon_uuid'];	//get uuid
+						$beacon_major =$_REQUEST['beacon_major']; //get major
+						$beacon_minor =$_REQUEST['beacon_minor']; //get minor
+						$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
+						if(count($array)>0){
+								
+							
+						}
+					
+					
+			}			
 	}
-	else{
-	
-	$missions=getMissions();
-	?>{"missions":[
-  <?php
-	$record_count = $missions->post_count;
-	$counter = 0;
-	//echo $count;
-	//var_dump($missions);
-	
-	foreach ($missions->posts as $mission){
-						$stations = getStationsForMission($mission->ID);
-							echo '{"name":"'.$mission->post_title.'",';
-							echo '"id":"'.$mission->ID.'",';
-							echo '"stations":';
-							echo $stations;
-							echo '}';	
-							if($counter!=$record_count-1){						
-								echo ",";
-							}
-							$counter++;	
-				}
-	
-?>]}
-<?php }
 wp_reset_postdata();
-	function getBeacons(){
-		
-	}
+	
 
 	function getStationsForMission($id=NULL){
 			$station_object = new Station();
