@@ -19,6 +19,7 @@ Paramaters
 -beacon id, minor, major
 
 *$_REQUEST['action']==="saveProximity"
+
 Paramaters
 -date
 -proximity
