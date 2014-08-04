@@ -13,10 +13,10 @@ API distincs several scenarios:
 *$_REQUEST['action']==="saveRegion"
 
 Paramaters
--date
--entered
--user
--beacon id, minor, major
+ -date
+ -entered
+ -user
+ -beacon id, minor, major
 
 *$_REQUEST['action']==="saveProximity"
 
