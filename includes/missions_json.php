@@ -1,5 +1,9 @@
 <?php global $post;
-header('Content-Type: application/json');
+
+error_reporting(E_ALL);
+require_once( dirname(__FILE__) . '/events.php' );
+
+//header('Content-Type: application/json');
 	//get all missions
 	if(isset($_REQUEST['action'])){
 			
@@ -51,19 +55,27 @@ header('Content-Type: application/json');
      
  <?php
 			}
-			if($_REQUEST['action']==="saveBeacon"){
+			if($_REQUEST['action']==="saveRegion"){
 						$beacon_id = $_REQUEST['beacon_uuid'];	//get uuid
 						$beacon_major =$_REQUEST['beacon_major']; //get major
 						$beacon_minor =$_REQUEST['beacon_minor']; //get minor
+						$user =$_REQUEST['user'];
+						$date =$_REQUEST['event_date'];
+						$entered =$_REQUEST['entered'];
+						
 						$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
+	
 						if(count($array)>0){
-								
-							
+								$ibeacon = $array[0];
+								addRegionEvent($date,$entered,$user, $ibeacon->ID);									
+									
 						}
 					
-					
-			}			
+						print_r($array);
+					//	die("hmm");	
+			}		
 	}
+	
 wp_reset_postdata();
 	
 
