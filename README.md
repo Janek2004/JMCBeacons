@@ -9,6 +9,13 @@ JMCBeacons is a simple WordPress plugin for iBeacons
 iOS app sends HTTP request to the endpoint
 endpoint distincts different request by querying 'action' url paramater $_REQUEST['action'] in missions_json.php (subject to change).
 
+
+
+- Type some Markdown text in the left window
+- See the HTML in the right
+- Magic
+
+
 API distincs several scenarios:
 *$_REQUEST['action']==="saveRegion"
 
