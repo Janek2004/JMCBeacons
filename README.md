@@ -13,6 +13,7 @@ API distincs several scenarios:
 *$_REQUEST['action']==="saveRegion"
 
 Paramaters
+
  -date
  -entered
  -user
