@@ -21,10 +21,10 @@ API distincs several scenarios:
 
 Paramaters
 
- -date
- -entered
- -user
- -beacon id, minor, major
+ - date
+ - entered
+ - user
+ - beacon id, minor, major
 
 *$_REQUEST['action']==="saveProximity"
 
