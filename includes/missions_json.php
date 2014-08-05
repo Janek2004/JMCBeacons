@@ -55,19 +55,37 @@ require_once( dirname(__FILE__) . '/events.php' );
      
  <?php
 			}
+			if($_REQUEST['action']==="saveProximity"){
+						$beacon_id = $_REQUEST['beacon_uuid'];	//get uuid
+						$beacon_major =$_REQUEST['beacon_major']; //get major
+						$beacon_minor =$_REQUEST['beacon_minor']; //get minor
+						$user =$_REQUEST['user'];
+						$date =$_REQUEST['event_date'];
+						$proximity =$_REQUEST['proximity'];
+						$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
+	
+						if(count($array)>0){
+								$ibeacon = $array[0];
+								addProximityEvent($date,$proximity,$user, $ibeacon->ID);									
+									
+						}
+			}
+			
+			
+			
 			if($_REQUEST['action']==="saveRegion"){
 						$beacon_id = $_REQUEST['beacon_uuid'];	//get uuid
 						$beacon_major =$_REQUEST['beacon_major']; //get major
 						$beacon_minor =$_REQUEST['beacon_minor']; //get minor
 						$user =$_REQUEST['user'];
 						$date =$_REQUEST['event_date'];
-						$entered =$_REQUEST['entered'];
+						$state =$_REQUEST['state'];
 						
 						$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
 	
 						if(count($array)>0){
 								$ibeacon = $array[0];
-								addRegionEvent($date,$entered,$user, $ibeacon->ID);									
+								addRegionEvent($date,$state,$user, $ibeacon->ID);									
 									
 						}
 					

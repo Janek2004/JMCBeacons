@@ -84,7 +84,7 @@ function jmcbeacons_template_check() {
 add_action('init', 'jmcbeacons_do_output_buffer');
 function jmcbeacons_do_output_buffer() {
       //  ob_start();
-			
+ 	//updateJMCDB();	
 			
 			
 }
@@ -154,26 +154,30 @@ if ( ! empty( $wpdb->collate ) ) {
 
 
 
-$region_sql = "CREATE TABLE $region_table_name (
+$sql = "CREATE TABLE $region_table_name (
  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-`entered` INT NOT NULL,
+`state` INT NOT NULL,
 `event_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
 `user` tinytext NOT NULL,
 `beacon_id` INT NOT NULL
-) $charset_collate;";
+) $charset_collate; ";
 
-$proximity_sql = "CREATE TABLE $proximity_table_name (
+$sql = $sql."CREATE TABLE $proximity_table_name (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `proximity` INT NOT NULL,
-  `event_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,`
+  `event_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
   `user` tinytext NOT NULL,
   `beacon_id` INT NOT NULL
-) $charset_collate;";
+) $charset_collate";
 
+//echo $sql;
+//die();
 
 require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-dbDelta($region_sql );
-dbDelta( $proximity_sql );
+dbDelta($sql );
+//die("Here");
+
+
 }
 
 
