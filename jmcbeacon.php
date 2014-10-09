@@ -6,7 +6,7 @@
 Plugin Name: JMCBeacons
 Plugin URI: https://github.com/
 Description: A lightweight ibeacons compatible platform built using WordPress
-Version: 0.1
+Version: 0.2
 Author: Janusz Chudzynski
 Author URI: 
 
@@ -24,7 +24,7 @@ CREATE TABLE region_events (
 
 
 */
-
+ini_set('auto_detect_line_endings', true);
 //add_action('admin_menu', 'jmcbeacons_admin_menu');
 //add_action('parse_request', 'jmcbeacons_parse_request');
 
@@ -34,13 +34,27 @@ register_deactivation_hook(__FILE__,'jmcbeacons_deactivate');
 require_once( dirname(__FILE__) . '/includes/missions.php' );
 require_once( dirname(__FILE__) . '/includes/stations.php' );
 require_once( dirname(__FILE__) . '/includes/ibeacons.php' );
+require_once( dirname(__FILE__) . '/includes/students_import.php' );
+
 
 
 global $jmcbeacons_db_version;
-$jmcbeacons_db_version = "1";
+$jmcbeacons_db_version = "1.1";
 
 
 //add_action( 'wp_head', 'favicon_link' );
+
+//add_action('init', 'addStudents');
+function addStudents(){
+	$file1 = dirname(__FILE__)."/students_data/junior.csv";
+//	$file2 = dirname(__FILE__)."/students_data/senior.csv";	
+	csv_to_array($file1,",","junior");
+//	csv_to_array($file2,",","senior");
+}
+
+
+
+
 
 function jmcbeacons_register_css() {
 	wp_register_script('beaconjs', plugins_url('includes/beacon.js',__FILE__ ));
@@ -60,9 +74,8 @@ function templateRedirect()
 			http://localhost/Badges/wp/?missions_json=1&action=saveBeacon&beacon_uuid=223&beacon_minor=42&beacon_major=42
 		
 		*/
-	
 		$template_file = plugin_dir_path( __FILE__ ). '/Includes/missions_json.php';
-    include($template_file);	
+		include($template_file);	
 		exit;
 	}		
 }
@@ -147,6 +160,8 @@ if ( ! empty( $wpdb->charset ) ) {
 
 $region_table_name = $wpdb->prefix."_region_events";
 $proximity_table_name = $wpdb->prefix."_proximity_events";
+$session_table_name = $wpdb->prefix."_session_events";
+
 
 if ( ! empty( $wpdb->collate ) ) {
   $charset_collate .= " COLLATE {$wpdb->collate}";
@@ -158,7 +173,7 @@ $sql = "CREATE TABLE $region_table_name (
  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 `state` INT NOT NULL,
 `event_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
-`user` tinytext NOT NULL,
+`user` INT NOT NULL,
 `beacon_id` INT NOT NULL
 ) $charset_collate; ";
 
@@ -166,9 +181,18 @@ $sql = $sql."CREATE TABLE $proximity_table_name (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `proximity` INT NOT NULL,
   `event_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
-  `user` tinytext NOT NULL,
+  `user` INT NOT NULL,
   `beacon_id` INT NOT NULL
+) $charset_collate; ";
+
+$sql = $sql."CREATE TABLE $session_table_name (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `login_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  `logout_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NULL ,
+  `user` INT NOT NULL,
+  `primary_nurse` INT 
 ) $charset_collate";
+
 
 //echo $sql;
 //die();

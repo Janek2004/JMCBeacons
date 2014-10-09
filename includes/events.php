@@ -1,4 +1,33 @@
- <?php
+<?php
+
+/**Log's in user and returns id of the row that can be used as a session id */
+function loginUser($user){
+	global $wpdb;
+	//$wpdb->show_errors();
+	$session_table_name = $wpdb->prefix."_session_events";
+	$date =time();
+	$wpdb->insert($session_table_name,
+	array(
+		'login_date'=>$date,
+		'user'=>$user
+	 )
+	);
+	return $wpdb->insert_id;	
+}
+
+/**Updates the session with a status of primary/secondary nurse*/
+function updateNurse($session, $nurse){
+	global $wpdb;
+	$session_table_name = $wpdb->prefix."_session_events";
+	$result = $wpdb->update( 
+		$session_table_name,
+		array('nurse'=>nurse),
+		array('id'=>$session)
+	);
+	
+	return  (false != $result);
+}
+
 //register region event
 function addRegionEvent( $date, $state, $user, $beacon_id){
 	global $wpdb;
@@ -13,10 +42,8 @@ function addRegionEvent( $date, $state, $user, $beacon_id){
 		)	
 	);
 	
-	echo $date; 
-	die();
-	
-	
+	//echo $date; 
+	//die();
 }
 
 //registers proximity event
@@ -29,9 +56,10 @@ function addProximityEvent( $date,$proximity, $user, $beacon_id){
 		
 		'user' =>$user,
 		'beacon_id' =>$beacon_id
-		
 		)	
 	);
+	
+
 }
 
 function getRegionEvent(){

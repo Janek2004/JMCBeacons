@@ -1,11 +1,84 @@
-<?php global $post;
-
+<?php 
+global $post;
 error_reporting(E_ALL);
 require_once( dirname(__FILE__) . '/events.php' );
+
+
+
+/*
+	Supported Actions:
+	student authentication 
+		login (userid, pass)
+		logout(userid)
+		update_nurse updating nurse status
+	
+	Scan
+		patient barcode
+		nurse barcode
+	
+	Overwriting
+		nurse id
+	
+	
+	Region monitoring
+		patient approached/left  //done
+		sink	approached/left  //done
+	
+	Proximity 
+		patient  //done
+		sink 	 //done
+		
+*/
+
+
 
 //header('Content-Type: application/json');
 	//get all missions
 	if(isset($_REQUEST['action'])){
+			
+			if($_REQUEST['action']==="login"){
+				
+				$user_id = $_REQUEST['user'];
+				$pass = $_REQUEST['password'];
+			
+				$creds = array();
+				$creds['user_login'] = $user_id;
+				$creds['user_password'] = $pass;
+				
+				$user = wp_signon( $creds, false );
+				
+				if ( is_wp_error($user) )
+				{				
+					$errors = array_keys($user->errors);
+					$e_m = "";
+					foreach($errors as $error){
+						$e_m = $e_m. " ".$error;
+					}
+					echo '{"error_message":'.'"'.$e_m.'"}';
+				}
+				else{
+					$session = loginUser($user->ID);
+					if($session!=0){
+						echo '{"userid":'.$user->ID. ', "session":'.$session.'}';
+					}
+				}
+			}
+			
+			if($_REQUEST['action']==="nurse"){
+				$nurse = $_REQUEST['nurse'];
+				$session = $_REQUEST['session'];
+				$result = updateNurse($session, $nurse);
+				echo $result;
+			
+			}
+			
+			if($_REQUEST['action']==="logout"){
+			
+			}
+			if($_REQUEST['action']==="login"){
+			
+			}
+			
 			
 			if($_REQUEST['action']==="getData"){
 	
@@ -18,7 +91,6 @@ require_once( dirname(__FILE__) . '/events.php' );
 		
 				//take always first one
 				$ibeacon = $array[0];
-				//print_r($ibeacon);
 			
 				$station_array = Station::getStationsForBeacon($ibeacon);
 			//	print_r($station_array);
@@ -89,7 +161,7 @@ require_once( dirname(__FILE__) . '/events.php' );
 									
 						}
 					
-						print_r($array);
+					//	print_r($array);
 					//	die("hmm");	
 			}		
 	}
