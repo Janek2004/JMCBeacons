@@ -1,5 +1,5 @@
 <?php
-
+date_default_timezone_set('America/Chicago');
 /**Log's in user and returns id of the row that can be used as a session id */
 function loginUser($user){
 	global $wpdb;

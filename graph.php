@@ -1,8 +1,9 @@
 <?php
+ini_set('display_errors', 1);
 error_reporting(E_ALL);
 // Same as error_reporting(E_ALL);
 ini_set('error_reporting', E_ALL);
-date_default_timezone_set('America/New_York');
+date_default_timezone_set('America/Chicago');
 
 $ROW_HEIGHT = 100;
 
@@ -23,9 +24,9 @@ $ROW_HEIGHT = 100;
 <?php
 
 // Create connection
-//$con=mysqli_connect("atcwebapp.argo.uwf.edu","phpapp_user","HVzcdVwnHyXwTpcF","wordpress99");
+$con=mysqli_connect("localhost","phpapp_user","HVzcdVwnHyXwTpcF","wordpress99");
 //$con=mysqli_connect('http://djmobilesoftware.com','janek211_ibeacons','stany','janek211_ibeacons');
-$con=mysqli_connect('ns2.oxen.arvixe.com','janek211_ibeacon','stany','janek211_ibeacons');
+//$con=mysqli_connect('ns2.oxen.arvixe.com','janek211_ibeacon','stany','janek211_ibeacons');
 
 
 // Check connection
@@ -38,8 +39,16 @@ if(!isset($_REQUEST["start"])&&!isset($_REQUEST["stop"])){
 }
 
 if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
-	 $timeline_start = $_REQUEST["start"];
-	 $timeline_stop = $_REQUEST["stop"];
+	 $timestamp1= $_REQUEST["start"];
+	 $dt1 = new DateTime($_REQUEST["start"]);
+	 $timeline_start = $dt1->format('Y-m-d H:i:s');;
+	
+	 $dt2 = new DateTime($_REQUEST["stop"]);
+	 $timeline_stop = $dt2->format('Y-m-d H:i:s');;
+		
+	// print_r($_REQUEST);
+		
+	
 	 $user = $_REQUEST['user'];
 }
 
@@ -48,14 +57,20 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 		global $con;
 		$users_result;
 		try{
-		$users_result = mysqli_query($con,"SELECT * FROM `wp_users`");
+			$users_result = mysqli_query($con,"SELECT * FROM `wp_users`");
 		}
 		catch(Exception $e){
-		echo $e->getMessage();
+			echo $e->getMessage();
 		}
-	
-		$arrayofusers = mysqli_fetch_all($users_result);		
-		return $arrayofusers;		
+		
+		//die("Hm".$users_result);
+		
+		if(mysqli_num_rows($users_result)){
+			$arrayofusers = mysqli_fetch_all($users_result);	
+			return $arrayofusers;
+		}
+		return null;//new Array();
+				
 	}
 	
 	//returns list of the beacons
@@ -71,6 +86,19 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 		$arrayofibeacons = mysqli_fetch_all($ibeacons_result);
 		return $arrayofibeacons;				
 	}
+	
+	function clearTables(){
+		global $con;
+		try{
+		 mysqli_multi_query($con,"DELETE FROM `wp__region_events` WHERE 1; DELETE FROM `wp__override_events` WHERE 1; DELETE FROM `wp__proximity_events` WHERE 1; DELETE FROM `wp__scan_events` WHERE 1;DELETE FROM `wp__session_events` WHERE 1");
+		}
+		catch(Exception $e){
+			echo $e->getMessage();
+			die("Didnt work");
+		}
+	}
+	
+	//clearTables();
 	
 	
 	//get proximity events
@@ -100,7 +128,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 			echo $e->getMessage();
 		}
 	
-		$regions = mysqli_fetch_all($regions_result);		
+		$regions = mysqli_fetch_all($regions_result,MYSQLI_ASSOC);		
 		return $regions;			
 	}	
 
@@ -120,7 +148,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 			echo $e->getMessage();
 		}
 	
-		$regions = mysqli_fetch_all($regions_result);		
+		$regions = mysqli_fetch_all($regions_result,MYSQLI_ASSOC);		
 		return $regions;				
 	}
 	
@@ -143,22 +171,199 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 	$proximityArray = getProximityEvents($timeline_start, $user);
 	$regionsArray = getRegionEvents($user);
 	$sessionArray = getArray($con,"SELECT * FROM `wp__session_events` WHERE user = $user");
-	$scansArray =  getArray($con,"SELECT * FROM `wp__scans_events` WHERE user = $user");
+	$scansArray =  getArray($con,"SELECT * FROM `wp__scan_events` WHERE user = $user");
 	$overrideArray =  getArray($con,"SELECT * FROM `wp__override_events` WHERE user = $user");
 	
-	/*
-		print_r($overrideArray);
-		print_r($scansArray);
-		print_r($sessionArray);
-	*/
+
+	$all_events = array_merge($regionsArray,$sessionArray,$overrideArray,$scansArray);	
+
 	
+	function getEventDate($arr1){
+		$date1;
+
+		if(array_key_exists("override_date", $arr1))
+		{
+			$date1 = $arr1["override_date"];
+		}
+		
+		if(array_key_exists("scan_date", $arr1))
+		{
+			$date1 = $arr1["scan_date"];
+		}
+		
+		if(array_key_exists("login_date", $arr1))
+		{
+			$date1 = $arr1["login_date"];
+		}
+		if(array_key_exists("event_date", $arr1))
+		{
+			$date1 = $arr1["event_date"];
+		}
+				
+		return $date1;	
+	}
 	
-	$all_events = array_merge($regionsArray,$sessionArray,$overrideArray);
 	
 	//sort by date
 	function compare($arr1,  $arr2){
-	//array_key_exists		
+		$date1;
+		$date2;
+		if(array_key_exists("override_date", $arr1))
+		{
+			$date1 = $arr1["override_date"];
+		}
+		if(array_key_exists("override_date", $arr2))
+		{
+			$date2 = $arr2["override_date"];
+		}
+		
+		if(array_key_exists("scan_date", $arr1))
+		{
+			$date1 = $arr1["scan_date"];
+		}
+		if(array_key_exists("scan_date", $arr2))
+		{
+			$date2 = $arr2["scan_date"];
+		}
+		
+		if(array_key_exists("login_date", $arr1))
+		{
+			$date1 = $arr1["login_date"];
+		}
+		if(array_key_exists("login_date", $arr2))
+		{
+			$date2 = $arr2["login_date"];
+		}
+		if(array_key_exists("event_date", $arr1))
+		{
+			$date1 = $arr1["event_date"];
+		}
+		if(array_key_exists("event_date", $arr2))
+		{
+			$date2 = $arr2["event_date"];
+		}
+		
+		if(!isset($date2)){
+			echo "<h1>Error</h1>";
+			print_r($arr2);
+			return;
+		}
+				
+		if($date1==$date2) return 0;
+
+		return ($date1<$date2) ? -1:1;
 	}
+		usort($all_events, "compare");
+
+/** Displays Events */
+		function printEvents($events,$arrayofibeacons)
+		{
+				
+			$last_logout;
+			
+			for($i=0; $i<count($events)-1;$i++){
+				
+				$event= $events[$i];
+				$nextEvent=$events[$i+1];
+				
+				
+				$date1 = getEventDate($event);
+				$date2 = getEventDate($nextEvent);
+				
+				//echo $last_logout;
+			
+			
+								
+				if(array_key_exists("scan_date", $event)){
+					?>
+						<p><?php echo $event["scan_date"]; ?>Scanned Barcode: <?php echo $event["barcode_id"]; ?></p>
+					<?php
+				}
+				
+				if(array_key_exists("event_date", $event)){
+					$state = $event["state"];
+					$beacon = $event["beacon_id"];
+					$title = getIbeaconTitle($beacon, $arrayofibeacons);
+					$state_text = "";	
+					
+					//$state = 1;
+					switch  ($state){
+					/*
+						case 0:{
+							$state_text = "unknown";
+							return;
+							break;
+						}
+						*/
+						case 1:{
+							$state_text = " is inside ";
+								break;
+						}						
+						case 2:{
+							$state_text = " is outside ";
+							break;
+							}												
+					}
+					
+						if(!empty($state_text)){
+					?>
+						<p><?php echo $event["event_date"];?> Nurse  <?php echo $state_text." region: ".$title; ?></p>
+					<?php
+					}
+				}
+					if(array_key_exists("login_date", $event)){
+					
+						$primary = $event["primary_nurse"];
+						$primaryText= ($primary===1)?": as primary nurse":":"; 
+					?>
+						<hr>
+						<p><?php echo $event["login_date"]; ?> Logged in<?php echo $primaryText; ?></p>
+						
+					<?php
+					if(!empty($event["logout_date"]))
+						{  
+						
+						$last_logout = $event["logout_date"];?>
+						
+
+						<?php
+						}
+				}
+					if(isset( $last_logout)){
+					
+					if(($last_logout>=$date1)&& ($last_logout<=$date2))
+					{ 
+					
+						?>
+						<hr>
+						<p><?php echo $last_logout; ?> Logged out: </p>
+						<?php
+					}
+				}
+				
+					if(array_key_exists("override_date", $event)){
+					?>
+						<p> <?php echo $event["override_date"]; ?> Manual Override:</p>
+					<?php
+				}
+				
+				
+				
+			}
+		}
+		
+		function getIbeaconTitle($bid,$arrayofibeacons){
+			for($i=0;$i<count($arrayofibeacons);$i++)
+		{
+			$id= $arrayofibeacons[$i][0];	
+			$title= $arrayofibeacons[$i][1];
+			if($id == $bid){
+				return $title;
+			}
+		}
+			return "Beacon";
+		}
+		
 	?>
 	
 	<script type="text/javascript">
@@ -173,7 +378,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 			<?php
 		}
 	?>
-	console.log("Level is: "+ ibeacons[2].title);
+	//console.log("Level is: "+ ibeacons[2].title);
 	</script>
 	
 	<?php
@@ -232,8 +437,6 @@ $number_of_minutes = timeDifference($timeline_start, $timeline_stop);
 			
 <script type="text/javascript">
 	
-	
-		
 		function drawSegments(ctx){
 			ctx.moveTo(50,bottomLine);
 			for(var i =0; i<ibeacons.length;i++){
@@ -307,33 +510,41 @@ $number_of_minutes = timeDifference($timeline_start, $timeline_stop);
 
 
 	<div style="margin:auto; width:80%; text-align:center">
-  	<h1>iBeacon Station Data Visualisation</h1>
+  	<h1>iBeacon Data</h1>
   	<div style="text-align:left">
+		
     <form action="graph.php">
+		Data for: <select id="user" name="user">
+		<option value="Select User">Select an User</option>
+
+		<?php
+		for($i=0;$i<count($arrayofusers);$i++){
+			
+			 ?> 
+			 <option value="<?php echo $arrayofusers[$i][0]; ?>" <?php if($arrayofusers[$i][0]==$_REQUEST["user"]){echo " selected";}?> ><?php echo $arrayofusers[$i][1];?></option>
+			<?php
+			}	
+			?>
+		</select>
 		<p>Select Start Date:  <input class="datetime" name="start" value="<?php echo $timeline_start; ?>"></p>
 		<p>Select Stop Date:   <input class="datetime"  name="stop" value="<?php echo $timeline_stop; ?>"></p>
 
 	<input type="submit">
 	</form>
-		<select> <option value="Beacon Id">Beacon Id: 1 </option> </select>  
-		//$arrayofusers = mysqli_fetch_all($users_result);
-		<select id="user" name="userSelect">
-		<option value="Select User">Select an User</option>
-
-		<?php
-		for($i=0;$i<mysqli_num_rows($users_result);$i++){
-			
-			 ?> 
-			 <option value="<?php echo $arrayofusers[$i][0]; ?>"><?php echo $arrayofusers[$i][1]; ?></option>
-			<?php
-			}	
-			?>
-		</select>	
+		
 	
   	<canvas id="canvas" width="<?php echo $totalWidth;?>" height="<?php echo $totalHeight;?>" style="border:1px solid #000000; margin:auto" ></canvas>
-	</div>
-	
+	<h4>Events </h4>
+	<?php 
+		printEvents($all_events,$arrayofibeacons)
+		
+	?>
 
+	</div>
+
+	
+	
+	
 	
   <script type="text/javascript">
 
