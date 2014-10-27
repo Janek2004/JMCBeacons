@@ -39,10 +39,8 @@ require_once( dirname(__FILE__) . '/includes/students_import.php' );
 
 
 global $jmcbeacons_db_version;
-$jmcbeacons_db_version = "1.1";
+$jmcbeacons_db_version = "1.15";
 
-
-//add_action( 'wp_head', 'favicon_link' );
 
 //add_action('init', 'addStudents');
 function addStudents(){
@@ -52,7 +50,12 @@ function addStudents(){
 //	csv_to_array($file2,",","senior");
 }
 
+function testMethods(){
+//Unit Tests
+//http://atcwebapp.argo.uwf.edu/trainingstations/wp_trainingstations/wp-content/plugins/jmcbeacons/unittest.php
 
+
+}
 
 
 
@@ -96,9 +99,9 @@ function jmcbeacons_template_check() {
 
 add_action('init', 'jmcbeacons_do_output_buffer');
 function jmcbeacons_do_output_buffer() {
-      //  ob_start();
+    //ob_start();
  	//updateJMCDB();	
-			
+	// testMethods();		
 			
 }
 
@@ -161,6 +164,9 @@ if ( ! empty( $wpdb->charset ) ) {
 $region_table_name = $wpdb->prefix."_region_events";
 $proximity_table_name = $wpdb->prefix."_proximity_events";
 $session_table_name = $wpdb->prefix."_session_events";
+$overrides_table_name = $wpdb->prefix."_override_events";
+$scans_table_name = $wpdb->prefix."_scan_events";
+
 
 
 if ( ! empty( $wpdb->collate ) ) {
@@ -168,8 +174,7 @@ if ( ! empty( $wpdb->collate ) ) {
 }
 
 
-
-$sql = "CREATE TABLE $region_table_name (
+$sql = "CREATE TABLE  $region_table_name (
  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 `state` INT NOT NULL,
 `event_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -177,7 +182,7 @@ $sql = "CREATE TABLE $region_table_name (
 `beacon_id` INT NOT NULL
 ) $charset_collate; ";
 
-$sql = $sql."CREATE TABLE $proximity_table_name (
+$sql = $sql."CREATE TABLE  $proximity_table_name (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `proximity` INT NOT NULL,
   `event_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -185,22 +190,38 @@ $sql = $sql."CREATE TABLE $proximity_table_name (
   `beacon_id` INT NOT NULL
 ) $charset_collate; ";
 
-$sql = $sql."CREATE TABLE $session_table_name (
+$sql = $sql."CREATE TABLE  $session_table_name (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `login_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NOT NULL,
   `logout_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NULL ,
   `user` INT NOT NULL,
   `primary_nurse` INT 
-) $charset_collate";
+) $charset_collate;";
+
+$sql = $sql."CREATE TABLE  $overrides_table_name (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   `override_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NULL ,
+  `user` INT NOT NULL,
+  `session_id` INT 
+) $charset_collate;";
+
+$sql = $sql."CREATE TABLE  $scans_table_name (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   `scan_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NULL ,
+  `user` INT NOT NULL,
+  `session` INT,
+  `barcode_id` INT
+
+ ) $charset_collate";
+
 
 
 //echo $sql;
-//die();
 
 require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 dbDelta($sql );
-//die("Here");
 
+//die();
 
 }
 
