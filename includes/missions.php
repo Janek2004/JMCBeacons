@@ -1,10 +1,21 @@
 <?php
+
+class Mission{
+		public static function getMissions(){
+		$query = new WP_QUERY(array('post_type'=>'Mission'));
+		return $query;
+	}
+
+}
+
+
+
 // Register Custom Post Type
 function missions_post_type() {
 
 	$labels = array(
 		'name'                => _x( 'Missions', 'Post Type General Name', 'text_domain' ),
-		'singular_name'       => _x( 'Mission', 'Post Type Singular Name', 'text_domain' ),
+		'singular_name'       => _x( 'Mission',  'Post Type Singular Name', 'text_domain' ),
 		'menu_name'           => __( 'Missions', 'text_domain' ),
 		'parent_item_colon'   => __( 'Parent Item:', 'text_domain' ),
 		'all_items'           => __( 'All Items', 'text_domain' ),

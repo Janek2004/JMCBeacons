@@ -25,6 +25,13 @@ CREATE TABLE region_events (
 
 */
 ini_set('auto_detect_line_endings', true);
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+// Same as error_reporting(E_ALL);
+ini_set('error_reporting', E_ALL);
+date_default_timezone_set('America/Chicago');
+
+
 //add_action('admin_menu', 'jmcbeacons_admin_menu');
 //add_action('parse_request', 'jmcbeacons_parse_request');
 

@@ -2,6 +2,10 @@
 date_default_timezone_set('America/Chicago');
 /**Log's in user and returns id of the row that can be used as a session id */
 function loginUser($user){
+	//check unfinished sessions
+	$session_id = getLastSessionForUser($user);
+	if(!is_null($session_id))	logoutUser($session_id);
+
 	global $wpdb;
 	$wpdb->show_errors();
 	$session_table_name = $wpdb->prefix."_session_events";
@@ -15,6 +19,17 @@ function loginUser($user){
 	return $wpdb->insert_id;	
 }
 
+//get last session
+function getLastSessionForUser($user){
+	global $wpdb;
+	$wpdb->show_errors();
+	$session_table_name = $wpdb->prefix."_session_events";
+	$sessions =  $wpdb->get_results( "SELECT * FROM $session_table_name WHERE user = $user AND logout_date IS NULL");
+	if($sessions){
+		$last = end($sessions);
+		if(!is_null($last)) return $last->id;
+	}
+}
 
 /*Overrides Warning */
 function overrideUser($user,$session,$date){

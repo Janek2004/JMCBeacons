@@ -1,9 +1,12 @@
 <?php 
 global $post;
 error_reporting(E_ALL);
+ini_set('display_errors', 1);
+// Same as error_reporting(E_ALL);
+ini_set('error_reporting', E_ALL);
 
 require_once( dirname(__FILE__) . '/events.php' );
-
+require_once( dirname(__FILE__) . '/missions.php' );
 
 
 /*
@@ -118,7 +121,9 @@ require_once( dirname(__FILE__) . '/events.php' );
 			}
 		 }//based on the id information display message and information		
 		 	if($_REQUEST['action']==="getMissions"){
-		 			?>
+					//get missions
+					$missions = Mission::getMissions();
+			?>
 		 {"missions":[
   			<?php
 					$record_count = $missions->post_count;
@@ -151,12 +156,15 @@ require_once( dirname(__FILE__) . '/events.php' );
 						$date =$_REQUEST['event_date'];
 						$proximity =$_REQUEST['proximity'];
 						$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
-	
+						
 						if(count($array)>0){
 								$ibeacon = $array[0];
 								addProximityEvent($date,$proximity,$user, $ibeacon->ID);	
 			//echo "success".$user;							
 									
+						}
+						else{
+							echo "no beacon";
 						}
 			}
 			

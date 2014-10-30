@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 ini_set('error_reporting', E_ALL);
 date_default_timezone_set('America/Chicago');
 
-$ROW_HEIGHT = 100;
+$ROW_HEIGHT = 105;
 
 ?>
 <!DOCTYPE html>
@@ -17,7 +17,79 @@ $ROW_HEIGHT = 100;
 <script type="text/javascript" src="js/beaconevent.js"></script>
 <link rel="stylesheet" type="text/css" href="js/jquery.datetimepicker.css"/ >
 <script src="js/jquery.datetimepicker.js"></script>
+<style type="text/css">
+ol.simple-list {
+    list-style-type: none;
+    list-style-type: decimal !ie; /*IE 7- hack*/
+     
+    margin: 0;
+    margin-left: 3em;
+    padding: 0;
+     
+    counter-reset: li-counter;
+}
+ol.simple-list > li{
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 0.5em;
+    min-height: 3em;
+    border-left: 2px solid #CCCCCC;
+}
 
+p{
+  font: 200 14px/1.5 Georgia, Times New Roman, serif;
+   display:block;
+   background-color:#E8F4FF;
+   padding:0.5em;   
+   position: relative;
+   margin-bottom: 5px;
+   padding-left: 0.5em;
+    min-height: 3em;
+  }
+
+p.login{
+    padding:0.5em;   
+	position: relative;
+    margin-bottom: 20px;
+    padding-left: 0.5em;
+    min-height: 3em;
+    border-left: 2px solid #CCCCCC;
+	border-top: 2px solid #CCCCCC;
+	display:block;
+	background-color:#E8F4FF;
+	
+}
+p.logout{
+    position: relative;
+    margin-bottom: 20px;
+    padding:0.5em;
+	padding-left: 0.5em;
+	
+    min-height: 3em;
+    border-left: 2px solid #CCCCCC;
+	border-bottom: 2px solid #CCCCCC;
+	display:block;
+	background-color:#E8F4FF;
+	
+}
+
+ol.simple-list > li:before {
+    position: absolute;
+    top: 0;
+    left: -1em;
+    width: 0.8em;
+     
+    font-size: 3em;
+    line-height: 1;
+    font-weight: bold;
+    text-align: right;
+    color: #464646;
+ 
+    content: counter(li-counter);
+    counter-increment: li-counter;
+}
+
+</style>
 </head>
 <body>
 
@@ -36,6 +108,10 @@ if(!isset($_REQUEST["start"])&&!isset($_REQUEST["stop"])){
   $timeline_start=$datetime->format('Y-m-d');
   $datetime = new DateTime('tomorrow');
   $timeline_stop = $datetime->format('Y-m-d');
+}
+$clear = false;
+if(isset($_REQUEST["ccc"])){
+	$clear = true;
 }
 
 if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
@@ -63,8 +139,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 			echo $e->getMessage();
 		}
 		
-		//die("Hm".$users_result);
-		
+
 		if(mysqli_num_rows($users_result)){
 			$arrayofusers = mysqli_fetch_all($users_result);	
 			return $arrayofusers;
@@ -73,19 +148,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 				
 	}
 	
-	//returns list of the beacons
-	function getIbeacons(){
-		global $con;		
-		$ibeacons_result;
-		try{
-			$ibeacons_result = mysqli_query($con,"SELECT `ID`,`post_title` FROM `wp_posts` WHERE `post_type` = 'ibeacon'");
-		}	
-		catch(Exception $e){
-			echo $e->getMessage();
-		}
-		$arrayofibeacons = mysqli_fetch_all($ibeacons_result);
-		return $arrayofibeacons;				
-	}
+	
 	
 	function clearTables(){
 		global $con;
@@ -96,9 +159,10 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 			echo $e->getMessage();
 			die("Didnt work");
 		}
+		die("tabula rasa");
 	}
 	
-	//clearTables();
+	if($clear)	clearTables();
 	
 	
 	//get proximity events
@@ -116,43 +180,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 	  	$proximityArray = mysqli_fetch_all($result);				
 		return $proximityArray;
 	}
-	
-	//get list of the region events	
-	function getRegionEvents($user){
-		global $con;	
-		$regions_result;
-		try{
-			$regions_result = mysqli_query($con,"SELECT * FROM `wp__region_events` WHERE user = $user");
-		}	
-		catch(Exception $e){
-			echo $e->getMessage();
-		}
-	
-		$regions = mysqli_fetch_all($regions_result,MYSQLI_ASSOC);		
-		return $regions;			
-	}	
 
-	//get list of the overrides
-	function getOverrides(){
-		
-		
-	}
-	
-	function getSessionEvents($user){
-		global $con;	
-		$regions_result;
-		try{
-			$regions_result = mysqli_query($con,"SELECT * FROM `wp__session_events` WHERE user = $user");
-		}	
-		catch(Exception $e){
-			echo $e->getMessage();
-		}
-	
-		$regions = mysqli_fetch_all($regions_result,MYSQLI_ASSOC);		
-		return $regions;				
-	}
-	
-	
 	function getArray($con, $query){
 		$result;
 		try{
@@ -161,15 +189,16 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 		catch(Exception $e){
 			echo $e->getMessage();
 		}
-		$array = mysqli_fetch_all($result,MYSQLI_ASSOC);		
+		$array = mysqli_fetch_all($result, MYSQLI_BOTH);		
 		return $array;						
 	}
 	
 	
-	$arrayofusers = getUsers();
-	$arrayofibeacons = getIbeacons();
-	$proximityArray = getProximityEvents($timeline_start, $user);
-	$regionsArray = getRegionEvents($user);
+	$arrayofusers = getArray($con,"SELECT * FROM `wp_users`"); ///getUsers();
+	$arrayofibeacons =  getArray($con,"SELECT `ID`,`post_title` FROM `wp_posts` WHERE `post_type` = 'ibeacon'");
+	
+	$proximityArray =getArray($con,"SELECT * FROM wp__proximity_events WHERE event_date > '$timeline_start' AND event_date <'$timeline_stop' AND user ='$user' ORDER BY event_date ");//  getProximityEvents($timeline_start, $user);
+	$regionsArray = getArray($con,"SELECT * FROM `wp__region_events` WHERE user = $user");
 	$sessionArray = getArray($con,"SELECT * FROM `wp__session_events` WHERE user = $user");
 	$scansArray =  getArray($con,"SELECT * FROM `wp__scan_events` WHERE user = $user");
 	$overrideArray =  getArray($con,"SELECT * FROM `wp__override_events` WHERE user = $user");
@@ -259,21 +288,33 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 		function printEvents($events,$arrayofibeacons)
 		{
 				
-			$last_logout;
+			$last_logout=null;
 			
 			for($i=0; $i<count($events)-1;$i++){
 				
 				$event= $events[$i];
-				$nextEvent=$events[$i+1];
-				
-				
+				$nextEvent=$events[$i+1];		
 				$date1 = getEventDate($event);
 				$date2 = getEventDate($nextEvent);
-				
-				//echo $last_logout;
+		
+				if(array_key_exists("login_date", $event)){
+					
+						$primary = $event["primary_nurse"];
+						$primaryText= ($primary===1)?": as primary nurse":":"; 
+					?>
 			
-			
-								
+						<p class="login"><?php echo $event["login_date"]; ?> Logged in<?php echo $primaryText; ?></p>
+						
+					<?php
+					if(!empty($event["logout_date"]))
+						{  
+							$last_logout = $event["logout_date"];?>
+						
+						<?php
+						}
+				}
+		
+		
 				if(array_key_exists("scan_date", $event)){
 					?>
 						<p><?php echo $event["scan_date"]; ?>Scanned Barcode: <?php echo $event["barcode_id"]; ?></p>
@@ -286,7 +327,6 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 					$title = getIbeaconTitle($beacon, $arrayofibeacons);
 					$state_text = "";	
 					
-					//$state = 1;
 					switch  ($state){
 					/*
 						case 0:{
@@ -311,32 +351,15 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 					<?php
 					}
 				}
-					if(array_key_exists("login_date", $event)){
-					
-						$primary = $event["primary_nurse"];
-						$primaryText= ($primary===1)?": as primary nurse":":"; 
-					?>
-						<hr>
-						<p><?php echo $event["login_date"]; ?> Logged in<?php echo $primaryText; ?></p>
-						
-					<?php
-					if(!empty($event["logout_date"]))
-						{  
-						
-						$last_logout = $event["logout_date"];?>
-						
 
-						<?php
-						}
-				}
 					if(isset( $last_logout)){
 					
 					if(($last_logout>=$date1)&& ($last_logout<=$date2))
 					{ 
 					
 						?>
-						<hr>
-						<p><?php echo $last_logout; ?> Logged out: </p>
+				
+						<p class="logout"><?php echo $last_logout; ?> Logged out: </p>
 						<?php
 					}
 				}
@@ -347,7 +370,65 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 					<?php
 				}
 				
-				
+					if($i == count($events)-2){
+					
+					if(array_key_exists("scan_date", $nextEvent)){
+					?>
+						<p><?php echo $nextEvent["scan_date"]; ?>Scanned Barcode: <?php echo $nextEvent["barcode_id"]; ?></p>
+					<?php
+				    }
+					if(array_key_exists("override_date", $nextEvent)){
+					?>
+						<p> <?php echo $nextEvent["override_date"]; ?> Manual Override:</p>
+					<?php
+					}
+					
+					if(array_key_exists("logout_date",$nextEvent))
+					{
+						if(!is_null($nextEvent["logout_date"])){
+						
+						}
+					}
+						if(array_key_exists("event_date", $nextEvent)){
+					$state = $nextEvent["state"];
+					$beacon = $nextEvent["beacon_id"];
+					$title = getIbeaconTitle($beacon, $arrayofibeacons);
+					$state_text = "";	
+					
+					//$state = 1;
+					switch  ($state){
+					/*
+						case 0:{
+							$state_text = "unknown";
+							return;
+							break;
+						}
+						*/
+						case 1:{
+							$state_text = " is inside ";
+								break;
+						}						
+						case 2:{
+							$state_text = " is outside ";
+							break;
+							}												
+					}
+					
+						if(!empty($state_text)){
+					?>
+						<p><?php echo $nextEvent["event_date"];?> Nurse  <?php echo $state_text." region: ".$title; ?></p>
+					<?php
+					}
+				}
+					if(!is_null($last_logout)){
+						if($last_logout > $date2){
+					?>
+					
+						<p class="logout"><?php echo $last_logout; ?> Logged out: </p>
+						<?php
+					}
+				  }
+				}	
 				
 			}
 		}
@@ -385,7 +466,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 	mysqli_close($con);
 	
 	$totalHeight = count($arrayofibeacons) * $ROW_HEIGHT + 50;
-	$totalWidth = 800;
+	$totalWidth = 900;
 	?>
 	
 <script type="text/javascript">
@@ -407,9 +488,11 @@ for($i=0;$i<count($proximityArray);$i++){
 	 {
 		$date_start = $proximityArray[$i][2];
 		$date_end = $proximityArray[$i+1][2]; 
-		$duration =  timeDifference($date_start,$date_end);
+	//	$duration =  timeDifference($date_start,$date_end);
 		$start =     timeDifference($timeline_start,$date_start);
 		$type = $proximityArray[$i][4];
+		
+		$duration = 5/60;
 		
 		?> 
 		//duration,proximity,start,type	 
@@ -461,8 +544,9 @@ $number_of_minutes = timeDifference($timeline_start, $timeline_stop);
 				ctx.moveTo(50,bottomLine+20);
 				ctx.lineTo(750,bottomLine+20);
 				ctx.moveTo(50,bottomLine+20);
-				ctx.lineTo(50,50);
-				
+				ctx.lineTo(50,0);
+				ctx.moveTo(750,bottomLine+20);
+				ctx.lineTo(750,0);
 				
 				for(var i=0; i< 700;i=i+20)
 				{
@@ -489,7 +573,7 @@ $number_of_minutes = timeDifference($timeline_start, $timeline_stop);
 				ctx.font = "12px Arial";
 				ctx.fillText("Timeline (<?php echo $number_of_minutes;?> minutes)",graph_width/2.0-20, bottomLine+30);
 				
-				var one_minute_width = graph_width/minutes;
+				var one_minute_width = 750/minutes;
 			
 				ctx.lineWidth = 0.4;
 				var duration = 0;
@@ -501,7 +585,7 @@ $number_of_minutes = timeDifference($timeline_start, $timeline_stop);
 							
 							//depending on beacon change the bottom line
 							var level = getLevel(b.beaconId);
-							b.draw(x, bottomLine -level*100, width,proximity);		
+							if(x<750) b.draw(x, bottomLine -level*100, width,proximity);		
 							
 					}
 				}
@@ -556,7 +640,7 @@ $number_of_minutes = timeDifference($timeline_start, $timeline_stop);
 		
 		drawScale(ctx);
 		drawEvents(ctx,<?php echo $number_of_minutes;?>, events);
-		drawLegend(ctx);
+		drawLegend(graph_width,ctx);
 		drawSegments(ctx);
 		$(".datetime").css("color:red");
 		jQuery(".datetime").datetimepicker();

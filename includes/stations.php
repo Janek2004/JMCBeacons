@@ -1,11 +1,22 @@
 <?php
-error_reporting(-1);
-
 // Same as error_reporting(E_ALL);
 //ini_set('error_reporting', E_ALL);
-
+abstract class StationTypes
+{
+    const kdefault = 1;
+    const room = 2;
+    const simlab = 3;
+	const bed =4;
+	const sink =5;
+	
+	public static $types = [kdefault,room,simlab,sink];
+	
+	
+}
 
 class Station{
+
+
 	//public static 	
 	public static $associated_beacon_key = 'associated-jmcbeacon-id';
 	public static $station_parent_id_key = 'jmcbeacons-station-parent-id';
@@ -15,8 +26,19 @@ class Station{
 	public static	$nearby_radio_key		 = 'jmcbeacons-station-nearby-message-id_text_delete_image_attachment_radio';
 	public static	$immediate_attachment_key = 'jmcbeacons-station-immediate-message-id_text_attachment';
 	public static	$nearby_attachment_key = 'jmcbeacons-station-nearby-message-id_text_attachment';
-	public static $jmc_associated_beacon_key = 'associated-jmcbeacon-id';
+	public static 	$jmc_associated_beacon_key = 'associated-jmcbeacon-id';
+	public static 	$jmc_station_type = 'station-type';
+	
+	function __construct(){
+		// Hook into the 'init' action
+		add_action( 'init', array($this,'stations_post_type'));
+		add_action( 'add_meta_boxes',  array($this,'jmcbeacons_set_stations_metaboxes' ));
+		add_action( 'save_post',  array($this,'jmcbeacons_save_station_meta'),10,2 );
+		add_action('post_edit_form_tag', array($this,'form_type_jmcstation'));
+		
+	}
 
+	
 	public static function getImmediateMessage($id){
 		return get_post_meta( $id, Station::$immediate_message_key, true );
 	}
@@ -99,13 +121,8 @@ class Station{
 			$json_string = $json_string.'}';
 		return $json_string;
 	}
-}
-
-global $user_ID;
-global $post;
-// Register Custom Post Type
-if (!function_exists('stations_post_type')){
-function stations_post_type() {
+	
+	function stations_post_type() {
 
 	$labels = array(
 		'name'                => _x( 'Stations', 'Post Type General Name', 'text_domain' ),
@@ -144,29 +161,50 @@ function stations_post_type() {
 	
 	if(!post_type_exists('Station')){
 				register_post_type( 'Station', $args );	
+		}
 	}
-}
-}
-
-if (!function_exists('edit_form_type_wpse_98375')){
-function edit_form_type_wpse_98375() {
-    echo ' enctype="multipart/form-data"';
 	
-}
-}
+	function jmcbeacons_set_stations_metaboxes(){
+	global $post;
 
-	// Hook into the 'init' action
- 	add_action( 'init', 'stations_post_type', 0 );
- 	add_action( 'add_meta_boxes', 'jmcbeacons_set_stations_metaboxes' );
-	add_action( 'save_post', 'jmcbeacons_save_station_meta', 10, 2 );
-	add_action('post_edit_form_tag','edit_form_type_wpse_98375');
+	$type = get_post_meta( $post->ID, Station::$jmc_station_type, true );
+	if(is_null($type)||empty($type)){
+		//	update_post_meta($post,Station::$jmc_station_type,StationTypes::kdefault);
+		//$type = StationTypes::kdefault
+		$this->addTypeMetaBox();
+		//return;
+	}
+	
 
-if (!function_exists('jmcbeacons_set_stations_metaboxes')){
-function jmcbeacons_set_stations_metaboxes($post){
+	switch ($type){
+			case StationTypes::kdefault:
+			$this::addDefaultMetaBoxes();
+			break;
+		}
+	
+	}
+	
+	function addTypeMetaBox(){
+		//immediate
+		add_meta_box(
+		Station::$jmc_station_type,		// Unique ID
+		 esc_html__( 'Choose type of the station', 'example' ),	// Title
+		'type_message_meta_box',		// Callback function
+		'Station',						// Admin page (or post type)
+		'side',							// Context
+		'default',						// Priority
+		 array('beaconid'=>Station::$jmc_station_type)
+	);
+	
+	}
+	
+	
+	function addDefaultMetaBoxes(){
+		
 	add_meta_box(
 		Station::$station_parent_id_key,		// Unique ID
 		 esc_html__( 'Settings', 'example' ),	// Title
-		'station_parent_meta_box',		// Callback function
+		'station_settings_meta_box',		// Callback function
 		'Station',						// Admin page (or post type)
 		'side',							// Context
 		'default'						// Priority
@@ -195,8 +233,8 @@ function jmcbeacons_set_stations_metaboxes($post){
 	);
 	
 	
-	 remove_meta_box( 'postimagediv', 'Station', 'side' );
-   add_meta_box('postimagediv', __('Set Image to Show'), 'post_thumbnail_meta_box', 'Station', 'normal', 'high');
+    remove_meta_box( 'postimagediv', 'Station', 'side' );
+    add_meta_box('postimagediv', __('Set Image to Show'), 'post_thumbnail_meta_box', 'Station', 'normal', 'high');
 	
 	add_meta_box(
 		'jmcbeacons-station-time-id',		// Unique ID
@@ -206,15 +244,25 @@ function jmcbeacons_set_stations_metaboxes($post){
 		'side',							// Context
 		'default'						// Priority
 		);
-	}
-}
-
-
-//Saving station
-if (!function_exists('jmcbeacons_save_station_meta')){
-function jmcbeacons_save_station_meta($post_id, $post ){
-	global $_FILES;
 	
+	}
+	
+	
+	
+	
+	
+	function form_type_jmcstation() {
+    echo ' enctype="multipart/form-data"';
+	
+	}
+	
+	function jmcbeacons_save_station_meta($post_id, $post ){
+	//wp_reset_postdata(); 
+	global $_FILES;
+	global $post;
+	
+	if(is_null($post)) return;
+
 	$post_type = get_post_type_object( $post->post_type );
 	
 	
@@ -264,7 +312,14 @@ function jmcbeacons_save_station_meta($post_id, $post ){
 			 }	
 		}
 }
+	
+	
+	
 }
+
+global $user_ID;
+global $post;
+// Register Custom Post Type
 
 
 
@@ -391,15 +446,28 @@ function station_message_meta_box($post,$meta) {
 }
 }
 
+
+
+function type_message_meta_box($post)
+{
+	?>	
+		<p>Please select type of the station.</p>
+		<select id="<?php echo Station::$jmc_station_type?>"> 
+		
+		
+		</select>
+	<?php
+}
+
 if (!function_exists('station_time_meta_box')){
 function station_time_meta_box($post) {
-  
-	
+ 
+
 	}
 }
 
-if (!function_exists('station_parent_meta_box')){
-function station_parent_meta_box($post) {
+if (!function_exists('station_settings_meta_box')){
+function station_settings_meta_box($post) {
 
 	$args = array(
 		'post_type' => 'Mission'
@@ -440,12 +508,12 @@ function station_parent_meta_box($post) {
 	if(!$count>0){
 		?>
 	<p style="color:#FF0000">No beacon selected for this station.</p>
-<?php
-  }
-	
+	<?php
+	}
 	wp_reset_postdata();
-	?>
+?>
 
+<p>Mission: 
 <select id="<?php echo Station::$station_parent_id_key;?>" name="<?php echo Station::$station_parent_id_key;?>">
   <?php 
 			$count = 0;
@@ -461,13 +529,22 @@ function station_parent_meta_box($post) {
 			}
 		?>
         
-</select>
+</select></p>
 <?php
+	if($count == 0){
+		?>
+			<p style="color:#FF0000">You have to add a new mission</p>
+	<?php
+	}
+
 	if(!$count>0){
 		?>
-<p style="color:#FF0000">No mission selected for this station.</p>
-<?php
+		<p style="color:#FF0000">No mission selected for this station.</p>
+	<?php
   }
+  
+  
+  
 	
 	wp_reset_postdata();
  }
@@ -498,4 +575,5 @@ function deleteAllAttachments(){
 }
 }
 
+$station = new Station();
 ?>

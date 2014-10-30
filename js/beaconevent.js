@@ -1,5 +1,5 @@
 /** Shows Legend */
-function drawLegend(ctx)
+function drawLegend(graph_width, ctx)
 {     var b0 = new BeaconEvent(0,0,0);
       var b1 = new BeaconEvent(0,1,0);
       var b2 = new BeaconEvent(0,2,0);
@@ -7,8 +7,8 @@ function drawLegend(ctx)
 
       var height = 20;
       var width = 50;
-      var y = 50;
-      var x_offset = 100;
+      var y = 5;
+      var x_offset = 140;
       ctx.fillStyle = b0.style;
       ctx.fillRect(graph_width- x_offset,y,width,height);
 
