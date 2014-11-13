@@ -49,12 +49,13 @@ global $jmcbeacons_db_version;
 $jmcbeacons_db_version = "1.15";
 
 
-//add_action('init', 'addStudents');
+add_action('init', 'addStudents');
 function addStudents(){
-	$file1 = dirname(__FILE__)."/students_data/junior.csv";
+	//$file1 = dirname(__FILE__)."/students_data/junior.csv";
 	$file2 = dirname(__FILE__)."/students_data/senior.csv";	
-	csv_to_array($file1,",","junior");
-	csv_to_array($file2,",","senior");
+	//csv_to_array($file1,",","junior");
+	//csv_to_array($file2,",","senior");
+	insertTesters();
 }
 
 function testMethods(){
@@ -70,6 +71,7 @@ function jmcbeacons_register_css() {
 	wp_register_script('beaconjs', plugins_url('includes/beacon.js',__FILE__ ));
 	wp_enqueue_script('beaconjs', plugins_url('includes/beacon.js',__FILE__ ));
 
+	
 }
 add_action( 'admin_enqueue_scripts', 'jmcbeacons_register_css' );
 

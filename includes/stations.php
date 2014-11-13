@@ -1,18 +1,21 @@
 <?php
 // Same as error_reporting(E_ALL);
 //ini_set('error_reporting', E_ALL);
-abstract class StationTypes
+class StationTypes
 {
-    const kdefault = 1;
-    const room = 2;
-    const simlab = 3;
-	const bed =4;
-	const sink =5;
+   public $kdefault = 1;
+   public $room = 2;
+   public $simlab = 3;
+   public $bed =4;
+   public $sink =5;
 	
-	public static $types = [kdefault,room,simlab,sink];
+   public $types =  array();
 	
-	
-}
+   function __construct() {
+ 
+	$this->types =  ["default"=>$this->kdefault,"room"=>$this->room, "lab"=>$this->simlab, "sink"=>$this-> sink, "bed"=>$this->bed];
+   }
+  }
 
 class Station{
 
@@ -22,11 +25,11 @@ class Station{
 	public static $station_parent_id_key = 'jmcbeacons-station-parent-id';
 	public static $immediate_message_key = 'jmcbeacons-station-immediate-message-id_text';
 	public static $nearby_message_key 	 = 'jmcbeacons-station-nearby-message-id_text';
-	public static	$immediate_radio_key = 'jmcbeacons-station-immediate-message-id_text_delete_image_attachment_radio';
-	public static	$nearby_radio_key		 = 'jmcbeacons-station-nearby-message-id_text_delete_image_attachment_radio';
-	public static	$immediate_attachment_key = 'jmcbeacons-station-immediate-message-id_text_attachment';
-	public static	$nearby_attachment_key = 'jmcbeacons-station-nearby-message-id_text_attachment';
-	public static 	$jmc_associated_beacon_key = 'associated-jmcbeacon-id';
+	public static $immediate_radio_key = 'jmcbeacons-station-immediate-message-id_text_delete_image_attachment_radio';
+	public static $nearby_radio_key		 = 'jmcbeacons-station-nearby-message-id_text_delete_image_attachment_radio';
+	public static $immediate_attachment_key = 'jmcbeacons-station-immediate-message-id_text_attachment';
+	public static $nearby_attachment_key = 'jmcbeacons-station-nearby-message-id_text_attachment';
+	public static  $jmc_associated_beacon_key = 'associated-jmcbeacon-id';
 	public static 	$jmc_station_type = 'station-type';
 	
 	function __construct(){
@@ -168,16 +171,18 @@ class Station{
 	global $post;
 
 	$type = get_post_meta( $post->ID, Station::$jmc_station_type, true );
+	
+	
 	if(is_null($type)||empty($type)){
 		//	update_post_meta($post,Station::$jmc_station_type,StationTypes::kdefault);
 		//$type = StationTypes::kdefault
-		$this->addTypeMetaBox();
-		//return;
+	//	$this->addTypeMetaBox();
 	}
 	
-
+	$this->addTypeMetaBox();
+	$st_types = new StationTypes();
 	switch ($type){
-			case StationTypes::kdefault:
+			case $st_types->kdefault:
 			$this::addDefaultMetaBoxes();
 			break;
 		}
@@ -264,13 +269,26 @@ class Station{
 	if(is_null($post)) return;
 
 	$post_type = get_post_type_object( $post->post_type );
+	$type = get_post_meta( $post->ID, Station::$jmc_station_type, true );
 	
+	//print_r($_POST);
 	
+	if(is_null($type)||empty($type)){
+		$t = $_POST[Station::$jmc_station_type];
+		update_post_meta($post_id, Station::$jmc_station_type,$t);		
+	
+		//die("update post");
+	}
+		
+	//die($type);
 	//post_id
 	if ( !current_user_can( $post_type->cap->edit_post, $post_id ) )
 		return $post_id;
+		
+		//updating type
+		
+		
 		//updating beacon
-	
 		$station_beacon = $_POST[Station::$associated_beacon_key];
 		update_post_meta( $post_id, Station::$associated_beacon_key, $station_beacon);
 			
@@ -449,12 +467,29 @@ function station_message_meta_box($post,$meta) {
 
 
 function type_message_meta_box($post)
-{
+{	
+	
+	$st_type =new StationTypes();
+	//get type 
+	$ctype =	get_post_meta($post->ID,  Station::$jmc_station_type, true);
+	
+	
 	?>	
 		<p>Please select type of the station.</p>
-		<select id="<?php echo Station::$jmc_station_type?>"> 
+		<select id="<?php echo Station::$jmc_station_type?>" name="<?php echo Station::$jmc_station_type?>"> 
+		<?php 
 		
 		
+		foreach($st_type->types as $key=>$type){
+	
+			if(intval($ctype)== intval($type)){
+				echo "<option value='".$type."' selected>".$key ."</option>";
+			}
+			else{
+						echo "<option value='".$type."'>".$key ."</option>";
+			}
+		}
+		?>
 		</select>
 	<?php
 }
@@ -488,15 +523,25 @@ function station_settings_meta_box($post) {
 	$selected='';
 			
 
-	$beacon_ids = get_post_meta( $post->ID, Station::$associated_beacon_key, false );
-	$beacon_ids= $beacon_ids[0];
-		
-	foreach ($beacon_ids as $beacon_id){
-		if(intval($beacon_id) === get_the_ID()){
-			$selected ='checked';	
-			$count++;
-		}	
+	$beacon_ids = get_post_meta( $post->ID, Station::$associated_beacon_key, true );
+	$beacon_id= $beacon_ids[0];
+	//print_r($beacon_id);
+
+/*	
+	if(is_array($beacon_ids)){
+			foreach ($beacon_ids as $beacon_id){
+				if(intval($beacon_id) === get_the_ID()){
+					$selected ='checked';	
+					$count++;
+			}	
+		}
 	}
+*/
+	if(intval($beacon_id) === get_the_ID()){
+		$selected ='checked';	
+	}
+		
+	
 		
 	?>
  		<input type="checkbox" name="<?php echo Station::$associated_beacon_key;?>[]" value="<?php echo get_the_ID();?>" <?php echo $selected; ?> /><?php echo get_the_title();?><br />

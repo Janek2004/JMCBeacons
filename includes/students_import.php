@@ -43,6 +43,16 @@ function csv_to_array($filename='', $delimiter=',', $level)
     return $data;
 }
 
+function insertTesters(){
+for ($i=1; $i<50; $i++)
+{
+	$username = "Tester".$i;
+	$password = "Tester".$i;
+	wp_create_user( $username, $password);
+}
+
+}
+
 function insertStudent($row){
 	$user_name = $row[3];
 	$password = $row[4];

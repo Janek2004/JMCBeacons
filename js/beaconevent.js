@@ -41,7 +41,8 @@ this.duration=duration; this.proximity=proximity; this.start=start;
 this.style="";
 this.beaconId=id;
 this.height = 0;
-        switch(proximity){ //unknown, immediate, nearby, far
+
+switch(proximity){ //unknown, immediate, nearby, far
 case 0:{
  this.height = 20; this.style="red"; break;
 } case 1:{
@@ -66,19 +67,25 @@ this.height = 0;
 switch(state){ //unknown, inside, outside
 
 case 0:{
- this.height = 20; this.style="red"; break;
+ this.height = 10; this.style="red"; break;
 } case 1:{
- this.height = 90; this.style="blue"; break;
+ this.height = 100; this.style="yellow"; break;
 } case 2:{
- this.height = 50; this.style="green"; break;
+ this.height = 100; this.style="green"; break;
 }
 }
 
 }
 
+BeaconEvent.prototype.draw = function(x,bottom,duration){
 
+              ctx.fillStyle = this.style;
+              ctx.fillRect(x,bottom-this.height,duration, this.height);
+              ctx.strokeRect(x,bottom-this.height,duration, this.height);
 
-BeaconEvent.prototype.draw = function(x,bottom,duration,proximity){
+      }
+  
+BeaconRegionEvent.prototype.draw = function(x,bottom,duration){
 
               ctx.fillStyle = this.style;
               ctx.fillRect(x,bottom-this.height,duration, this.height);
