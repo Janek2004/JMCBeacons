@@ -38,14 +38,14 @@ ol.simple-list > li{
 }
 
 p{
-  font: 200 14px/1.5 Georgia, Times New Roman, serif;
+  font: 200 12px/1.5 Georgia, Times New Roman, serif;
    display:block;
    background-color:#E8F4FF;
-   padding:0.5em;   
+   padding:0.2em;   
    position: relative;
-   margin-bottom: 5px;
-   padding-left: 0.5em;
-    min-height: 3em;
+   
+   padding-left: 0.2em;
+    min-height: 1.5em;
   }
 
 p.login{
@@ -388,13 +388,14 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 						
 						}
 					}
-						if(array_key_exists("event_date", $nextEvent)){
+					if(array_key_exists("event_date", $nextEvent)){
 					$state = $nextEvent["state"];
 					$beacon = $nextEvent["beacon_id"];
 					$title = getIbeaconTitle($beacon, $arrayofibeacons);
 					$state_text = "";	
 					
 					//$state = 1;
+					
 					switch  ($state){
 					/*
 						case 0:{
@@ -409,7 +410,9 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 						}						
 						case 2:{
 							$state_text = " is outside ";
-							break;
+							$state_text = "";
+					
+						break;
 							}												
 					}
 					
@@ -701,8 +704,8 @@ $number_of_minutes = timeDifference($timeline_start, $timeline_stop);
 		drawLegend(graph_width,ctx);
 		drawSegments(ctx);
 		$(".datetime").css("color:red");
-		jQuery(".datetime").datetimepicker();
-		jQuery('#datetimepicker').datetimepicker();
+	//	jQuery(".datetime").datetimepicker();
+	//	jQuery('#datetimepicker').datetimepicker();
 		
 		console.log("ready");
 		

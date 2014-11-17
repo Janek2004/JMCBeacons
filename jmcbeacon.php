@@ -175,6 +175,7 @@ $proximity_table_name = $wpdb->prefix."_proximity_events";
 $session_table_name = $wpdb->prefix."_session_events";
 $overrides_table_name = $wpdb->prefix."_override_events";
 $scans_table_name = $wpdb->prefix."_scan_events";
+$warning_table_name = $wpdb->prefix."_warning_events";
 
 
 
@@ -213,6 +214,15 @@ $sql = $sql."CREATE TABLE  $overrides_table_name (
   `user` INT NOT NULL,
   `session_id` INT 
 ) $charset_collate;";
+
+
+$sql = $sql."CREATE TABLE  $warning_table_name (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   `warning_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NULL ,
+  `user` INT NOT NULL,
+  `session_id` INT 
+) $charset_collate;";
+
 
 $sql = $sql."CREATE TABLE  $scans_table_name (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

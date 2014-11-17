@@ -62,6 +62,23 @@ function logoutUser($session){
 
 
 /**Updates the session with a status of primary/secondary nurse*/
+function showWarning($nurse, $session, $date){
+	global $wpdb;
+	$wpdb->show_errors();
+	
+	$table_name = $wpdb->prefix."_warning_events";
+	$result = $wpdb->insert( 
+		$session_table_name,
+		array(
+			'user'=>$nurse,
+			'session'=>$session,
+			'warning_date' =>$date	
+		)
+	);
+	return true;
+}
+
+/**Updates the session with a status of primary/secondary nurse*/
 function scanBarcode($nurse, $barcode,$session, $date){
 	global $wpdb;
 	$wpdb->show_errors();
@@ -78,7 +95,6 @@ function scanBarcode($nurse, $barcode,$session, $date){
 	);
 	return true;
 }
-
 
 
 /**Updates the session with a status of primary/secondary nurse */

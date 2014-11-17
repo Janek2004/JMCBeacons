@@ -68,6 +68,14 @@ require_once( dirname(__FILE__) . '/missions.php' );
 				}
 			}
 			
+			if($_REQUEST['action']==="warning"){
+			{
+				$nurse = $_REQUEST['nurse'];
+				$session = $_REQUEST['session'];
+				$date =date('Y-m-d G:i:s');
+			    showWarning($nurse, $session,$date); 
+			}
+			
 			if($_REQUEST['action']==="updatenurse"){
 				$nurse = $_REQUEST['nurse'];
 				$session = $_REQUEST['session'];
