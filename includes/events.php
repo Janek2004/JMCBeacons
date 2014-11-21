@@ -1,11 +1,27 @@
 <?php
 date_default_timezone_set('America/Chicago');
 /**Log's in user and returns id of the row that can be used as a session id */
+function getConnection()
+{
+	$servername = "localhost";
+	$username = "wordpressuser99";
+	$password = "hO4m_w8Or-w7";
+	$dbname = "wordpress99";
+
+	// Create connection
+	$conn = new mysqli($servername, $username, $password, $dbname);
+	// Check connection
+	if ($conn->connect_error) {
+		die("Connection failed: " . $conn->connect_error);
+	} 
+	return $conn;
+}
+
 function loginUser($user){
+	
 	//check unfinished sessions
 	$session_id = getLastSessionForUser($user);
 	if(!is_null($session_id))	logoutUser($session_id);
-
 	global $wpdb;
 	$wpdb->show_errors();
 	$session_table_name = $wpdb->prefix."_session_events";
@@ -19,17 +35,75 @@ function loginUser($user){
 	return $wpdb->insert_id;	
 }
 
+/**
+
+$sql = "INSERT INTO MyGuests (firstname, lastname, email)
+VALUES ('John', 'Doe', 'john@example.com')";
+
+if ($conn->query($sql) === TRUE) {
+    echo "New record created successfully";
+} else {
+    echo "Error: " . $sql . "<br>" . $conn->error;
+}
+
+$conn->close();*/
+
+
 //get last session
 function getLastSessionForUser($user){
-	global $wpdb;
-	$wpdb->show_errors();
-	$session_table_name = $wpdb->prefix."_session_events";
-	$sessions =  $wpdb->get_results( "SELECT * FROM $session_table_name WHERE user = $user AND logout_date IS NULL");
+//	global $wpdb;
+//	$wpdb->show_errors();
+	$session_table_name = "wp__session_events";
+//	$result =  $wpdb->get_results( "SELECT * FROM $session_table_name WHERE user = $user AND logout_date IS NULL");
+	
+	$connection = getConnection();
+	$results = $connection->query( "SELECT * FROM $session_table_name WHERE user = $user AND logout_date IS NULL");
+	$sessions = $results->fetch_array(MYSQLI_ASSOC);
+
 	if($sessions){
 		$last = end($sessions);
-		if(!is_null($last)) return $last->id;
+		if(is_array($last)){
+				if(!is_null($last)) return $last['id'];
+		}
+		else{
+			return $sessions["id"];
+		}
 	}
 }
+
+/*
+<?php
+//Open a new connection to the MySQL server
+$mysqli = new mysqli('host','username','password','database_name');
+
+//Output any connection error
+if ($mysqli->connect_error) {
+    die('Error : ('. $mysqli->connect_errno .') '. $mysqli->connect_error);
+}
+
+//MySqli Select Query
+$results = $mysqli->query("SELECT id, product_code, product_desc, price FROM products");
+
+print '<table border="1">';
+while($row = $results->fetch_assoc()) {
+    print '<tr>';
+    print '<td>'.$row["id"].'</td>';
+    print '<td>'.$row["product_code"].'</td>';
+    print '<td>'.$row["product_name"].'</td>';
+    print '<td>'.$row["product_desc"].'</td>';
+    print '<td>'.$row["price"].'</td>';
+    print '</tr>';
+}  
+print '</table>';
+
+// Frees the memory associated with a result
+$results->free();
+
+// close connection 
+$mysqli->close();
+?>
+*/
+
 
 /*Overrides Warning */
 function overrideUser($user,$session,$date){
@@ -68,7 +142,7 @@ function showWarning($nurse, $session, $date){
 	
 	$table_name = $wpdb->prefix."_warning_events";
 	$result = $wpdb->insert( 
-		$session_table_name,
+		$table_name,
 		array(
 			'user'=>$nurse,
 			'session'=>$session,
@@ -114,7 +188,7 @@ function updateNurse($session, $nurse){
 }
 
 //register region event
-function addRegionEvent( $date, $state, $user, $beacon_id){
+function addRegionEvent( $date, $state, $user, $beacon_id, $app_state){
 	global $wpdb;
 	$region_table_name = $wpdb->prefix."_region_events";
 	$date = date('Y-m-d H:i:s',$date);
@@ -123,13 +197,14 @@ function addRegionEvent( $date, $state, $user, $beacon_id){
 		'state'=>$state,
 		'event_date'=>$date,
 		'user' =>$user,
-		'beacon_id' =>$beacon_id	
+		'beacon_id' =>$beacon_id,
+		'application_state'=>$app_state
 		)	
 	);
 }
 
 //registers proximity event
-function addProximityEvent( $date,$proximity, $user, $beacon_id){
+function addProximityEvent( $date,$proximity, $user, $beacon_id, $app_state){
 	global $wpdb;
 	$wpdb->show_errors();
 	$date = date('Y-m-d H:i:s',$date);
@@ -140,7 +215,8 @@ function addProximityEvent( $date,$proximity, $user, $beacon_id){
 		'proximity'=>$proximity,
 		'event_date'=>$date,
 		'user' =>$user,
-		'beacon_id' =>$beacon_id
+		'beacon_id' =>$beacon_id,
+		'application_state'=>$app_state
 		)	
 	);
 	

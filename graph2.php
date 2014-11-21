@@ -201,9 +201,15 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 	$scansArray =  getArray($con,"SELECT * FROM `wp__scan_events` WHERE user = $user AND scan_date >  '$timeline_start'");
 	$overrideArray =  getArray($con,"SELECT * FROM `wp__override_events` WHERE user = $user AND override_date >  '$timeline_start'");
 	
+	$warningArray =  getArray($con,"SELECT * FROM `wp__warning_events` WHERE user = $user AND warning_date >  '$timeline_start'");
+	
+	//print_r($warningArray);
+	
+	$all_events = array_merge($regionsArray,$sessionArray,$overrideArray,$scansArray,$warningArray);	
 
-	$all_events = array_merge($regionsArray,$sessionArray,$overrideArray,$scansArray);	
-
+//	print_r($all_events);
+//	die();
+	
 	
 	function getEventDate($arr1){
 		$date1;
@@ -226,6 +232,14 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 		{
 			$date1 = $arr1["event_date"];
 		}
+		
+		if(array_key_exists("warning_date", $arr1))
+		{
+			$date1 = $arr1["warning_date"];
+		}
+		
+		
+				
 				
 		return $date1;	
 	}
@@ -269,6 +283,22 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 		{
 			$date2 = $arr2["event_date"];
 		}
+		if(array_key_exists("warning_date", $arr1))
+		{
+			$date1 = $arr1["warning_date"];
+		}
+		if(array_key_exists("warning_date", $arr2))
+		{
+			$date2 = $arr2["warning_date"];
+		}
+		
+		
+		if(!isset($date1)){
+			echo "<h1>Error</h1>";
+			print_r($arr1);
+			return;
+		}
+		
 		
 		if(!isset($date2)){
 			echo "<h1>Error</h1>";
@@ -318,12 +348,18 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 						<p><?php echo $event["scan_date"]; ?>Scanned Barcode: <?php echo $event["barcode_id"]; ?></p>
 					<?php
 				}
+				if(array_key_exists("warning_date", $event)){
+					?>
+						<p style="color:red"><?php echo $event["warning_date"]; ?> Displayed Warning: <?php echo $event["warning_date"]; ?></p>
+					<?php					
+				}
 				
 				if(array_key_exists("event_date", $event)){
 					$state = $event["state"];
 					$beacon = $event["beacon_id"];
 					$title = getIbeaconTitle($beacon, $arrayofibeacons);
 					$state_text = "";	
+					
 					
 					switch  ($state){
 					/*
@@ -343,10 +379,13 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 							break;
 							}												
 					}
+						$application_state  = $event["application_state"];
 					
 						if(!empty($state_text)){
 					?>
-						<p><?php echo $event["event_date"];?> Nurse  <?php echo $state_text." region: ".$title; ?></p>
+						<p><?php echo $event["event_date"];?> Nurse  <?php echo $state_text." region: ".$title. " app_state: ".$application_state ?>
+						
+						</p>
 					<?php
 					}
 				}
@@ -370,7 +409,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 				}
 				
 					if($i == count($events)-2){
-					
+										
 					if(array_key_exists("scan_date", $nextEvent)){
 					?>
 						<p><?php echo $nextEvent["scan_date"]; ?>Scanned Barcode: <?php echo $nextEvent["barcode_id"]; ?></p>
@@ -381,6 +420,13 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 						<p> <?php echo $nextEvent["override_date"]; ?> Manual Override:</p>
 					<?php
 					}
+					
+					if(array_key_exists("warning_date", $nextEvent)){
+					?>
+						<p style="color:red"><?php echo $nextEvent["warning_date"]; ?> Displayed Warning:</p>
+					<?php
+						
+					}			
 					
 					if(array_key_exists("logout_date",$nextEvent))
 					{
@@ -415,6 +461,7 @@ if(isset($_REQUEST["start"])&&isset($_REQUEST["stop"])){
 						break;
 							}												
 					}
+							
 					
 						if(!empty($state_text)){
 					?>

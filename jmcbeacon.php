@@ -22,18 +22,15 @@ CREATE TABLE region_events (
 `beacon_id` INT NOT NULL
 )ENGINE=MyISAM
 
-
 */
+
+
 ini_set('auto_detect_line_endings', true);
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 // Same as error_reporting(E_ALL);
 ini_set('error_reporting', E_ALL);
 date_default_timezone_set('America/Chicago');
-
-
-//add_action('admin_menu', 'jmcbeacons_admin_menu');
-//add_action('parse_request', 'jmcbeacons_parse_request');
 
 register_activation_hook(__FILE__,'jmcbeacons_activate');
 register_deactivation_hook(__FILE__,'jmcbeacons_deactivate');
@@ -43,11 +40,8 @@ require_once( dirname(__FILE__) . '/includes/stations.php' );
 require_once( dirname(__FILE__) . '/includes/ibeacons.php' );
 require_once( dirname(__FILE__) . '/includes/students_import.php' );
 
-
-
 global $jmcbeacons_db_version;
-$jmcbeacons_db_version = "1.15";
-
+$jmcbeacons_db_version = "1.216";
 
 add_action('init', 'addStudents');
 function addStudents(){
@@ -61,20 +55,13 @@ function addStudents(){
 function testMethods(){
 //Unit Tests
 //http://atcwebapp.argo.uwf.edu/trainingstations/wp_trainingstations/wp-content/plugins/jmcbeacons/unittest.php
-
-
 }
-
-
 
 function jmcbeacons_register_css() {
 	wp_register_script('beaconjs', plugins_url('includes/beacon.js',__FILE__ ));
 	wp_enqueue_script('beaconjs', plugins_url('includes/beacon.js',__FILE__ ));
-
-	
 }
 add_action( 'admin_enqueue_scripts', 'jmcbeacons_register_css' );
-
 
 function templateRedirect()
 {
@@ -83,8 +70,7 @@ function templateRedirect()
 		/*
 			missions_json file server role of a basic REST API 
 			to send request to it you need to specify an action and pass appropriate paramaters:
-			http://localhost/Badges/wp/?missions_json=1&action=saveBeacon&beacon_uuid=223&beacon_minor=42&beacon_major=42
-		
+			http://localhost/Badges/wp/?missions_json=1&action=saveBeacon&beacon_uuid=223&beacon_minor=42&beacon_major=42		
 		*/
 		$template_file = plugin_dir_path( __FILE__ ). '/Includes/missions_json.php';
 		include($template_file);	
@@ -94,7 +80,6 @@ function templateRedirect()
  
 // add our function to template_redirect hook
 add_action('template_redirect', 'templateRedirect');
-
 
 //Determine which template should be used:
 add_filter('template_include', 'jmcbeacons_template_check' );
@@ -106,12 +91,12 @@ function jmcbeacons_template_check() {
 }
 
 
+add_action('init', 'checkForUpdates');
 add_action('init', 'jmcbeacons_do_output_buffer');
 function jmcbeacons_do_output_buffer() {
     //ob_start();
  	//updateJMCDB();	
 	// testMethods();		
-			
 }
 
 function add_query_vars_filter( $vars ){
@@ -121,14 +106,16 @@ function add_query_vars_filter( $vars ){
 add_filter( 'query_vars', 'add_query_vars_filter' );
 
 function checkForUpdates(){
-global $wpdb;
-$installed_ver = get_option( "jmcbeacons_db_version" );
-
-	if ( $installed_ver != $jmcbeacons_db_version ) {
-		/// do something
-	}
+	global $wpdb;
+	$installed_ver = get_option( "jmcbeacons_db_version" );
+	global $jmcbeacons_db_version;
+	
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-	dbDelta( $sql );
+	if ( $installed_ver !== $jmcbeacons_db_version ) {
+		/// do something
+		updateJMCDB();
+	}
+
 	update_option( "jmcbeacons_db_version", $jmcbeacons_db_version );
 }
 
@@ -139,12 +126,9 @@ function jmcbeacons_activate()
 		echo "Unable to install plugin, because current theme does not support post-thumbnails. You can fix this by adding the following line to your current theme's functions.php file: add_theme_support( 'post-thumbnails' );";
 		exit;
 	}
-	
- 	updateJMCDB();
-	global $jmcbeacons_db_version;
- 
-	add_option("wpbadger_db_version", $jmcbeacons_db_version);
+	checkForUpdates();
 
+	
 	// Flush rewrite rules
 	global $wp_rewrite;
 	$wp_rewrite->flush_rules();
@@ -177,12 +161,9 @@ $overrides_table_name = $wpdb->prefix."_override_events";
 $scans_table_name = $wpdb->prefix."_scan_events";
 $warning_table_name = $wpdb->prefix."_warning_events";
 
-
-
 if ( ! empty( $wpdb->collate ) ) {
   $charset_collate .= " COLLATE {$wpdb->collate}";
 }
-
 
 $sql = "CREATE TABLE  $region_table_name (
  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -220,7 +201,7 @@ $sql = $sql."CREATE TABLE  $warning_table_name (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
    `warning_date` TIMESTAMP DEFAULT '0000-00-00 00:00:00' NULL ,
   `user` INT NOT NULL,
-  `session_id` INT 
+  `session` INT 
 ) $charset_collate;";
 
 
@@ -234,17 +215,10 @@ $sql = $sql."CREATE TABLE  $scans_table_name (
  ) $charset_collate";
 
 
-
 //echo $sql;
-
 require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 dbDelta($sql );
-
-//die();
-
 }
-
-
 
 ?>
 <?php

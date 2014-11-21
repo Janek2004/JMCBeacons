@@ -23,6 +23,7 @@ require_once( dirname(__FILE__) . '/missions.php' );
 	Overwriting
 		nurse id
 	
+	Displaying Warnings
 	
 	Region monitoring
 		patient approached/left  //done
@@ -38,7 +39,7 @@ require_once( dirname(__FILE__) . '/missions.php' );
 
 //header('Content-Type: application/json');
 	//get all missions
-	if(isset($_REQUEST['action'])){
+if(!isset($_REQUEST['action'])) die("Nope");
 			
 			if($_REQUEST['action']==="login"){
 				
@@ -68,12 +69,13 @@ require_once( dirname(__FILE__) . '/missions.php' );
 				}
 			}
 			
-			if($_REQUEST['action']==="warning"){
-			{
+			if($_REQUEST['action']==="warning")
+			{	
 				$nurse = $_REQUEST['nurse'];
 				$session = $_REQUEST['session'];
 				$date =date('Y-m-d G:i:s');
 			    showWarning($nurse, $session,$date); 
+			
 			}
 			
 			if($_REQUEST['action']==="updatenurse"){
@@ -120,7 +122,7 @@ require_once( dirname(__FILE__) . '/missions.php' );
 				$ibeacon = $array[0];
 			
 				$station_array = Station::getStationsForBeacon($ibeacon);
-			//	print_r($station_array);
+			
 				
 			foreach($station_array as $station){
 						echo Station::getJSONRepresentation($station);	
@@ -128,7 +130,9 @@ require_once( dirname(__FILE__) . '/missions.php' );
 				}
 			}
 		 }//based on the id information display message and information		
-		 	if($_REQUEST['action']==="getMissions"){
+		 
+
+		 if($_REQUEST['action']==="getMissions"){
 					//get missions
 					$missions = Mission::getMissions();
 			?>
@@ -136,8 +140,6 @@ require_once( dirname(__FILE__) . '/missions.php' );
   			<?php
 					$record_count = $missions->post_count;
 					$counter = 0;
-					//echo $count;
-					//var_dump($missions);
 					
 					foreach ($missions->posts as $mission){
 										$stations = getStationsForMission($mission->ID);
@@ -163,14 +165,13 @@ require_once( dirname(__FILE__) . '/missions.php' );
 						$user =$_REQUEST['user'];
 						$date =$_REQUEST['event_date'];
 						$proximity =$_REQUEST['proximity'];
+						$foreground = $_REQUEST['foreground'];
 						$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
 						
 						if(count($array)>0){
 								$ibeacon = $array[0];
-								addProximityEvent($date,$proximity,$user, $ibeacon->ID);	
-			//echo "success".$user;							
-									
-						}
+								addProximityEvent($date,$proximity,$user, $ibeacon->ID, $foreground);	
+							}
 						else{
 							echo "no beacon";
 						}
@@ -185,21 +186,14 @@ require_once( dirname(__FILE__) . '/missions.php' );
 						$user =$_REQUEST['user'];
 						$date =$_REQUEST['event_date'];
 						$state =$_REQUEST['state'];
-						
+						$foreground = $_REQUEST['foreground'];
 						$array = iBeacon::getBeaconID($beacon_id, $beacon_major, $beacon_minor);
 	
 						if(count($array)>0){
 								$ibeacon = $array[0];
-								addRegionEvent($date,$state,$user, $ibeacon->ID);									
-									
+								addRegionEvent($date,$state,$user, $ibeacon->ID, $foreground);												
 						}
-					
-					//	print_r($array);
-					//	die("hmm");	
 			}		
-	}
-	
-wp_reset_postdata();
 	
 
 	function getStationsForMission($id=NULL){
@@ -240,9 +234,7 @@ wp_reset_postdata();
 		endif;
 		$json_string = $json_string.']';
 		
-		return $json_string;
-		
-		
+		return $json_string;	
 }
 	
 	
@@ -251,7 +243,7 @@ wp_reset_postdata();
 	function getMissions(){
 			$args = array(
 			'post_type' => 'Mission',
-			'post_status'      => 'publish'
+			'post_status' => 'publish'
 			);
 			$query = new WP_Query( $args );
 			return $query;
