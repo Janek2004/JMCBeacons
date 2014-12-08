@@ -63,8 +63,15 @@ if(!isset($_REQUEST['action'])) die("Nope");
 				}
 				else{
 					$session = loginUser($user->ID);
-					if($session!=0){
-						echo '{"userid":'.$user->ID. ', "session":'.$session.'}';
+					if($session!=0){/*
+					typedef NS_ENUM(NSUInteger, kWarningStatus) {
+						kNoWarnings,
+						kPositiveWarnings,
+						kNegativeWarnings,
+						kAllWarnings
+					};
+					*/
+						echo '{"userid":'.$user->ID. ', "session":'.$session.',"warning_state":1}';
 					}
 				}
 			}
