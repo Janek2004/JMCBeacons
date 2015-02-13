@@ -71,7 +71,7 @@ if(!isset($_REQUEST['action'])) die("Nope");
 						kAllWarnings
 					};
 					*/
-						echo '{"userid":'.$user->ID. ', "session":'.$session.',"warning_state":1}';
+						echo '{"userid":'.$user->ID. ', "session":'.$session.',"warning_state":0}';
 					}
 				}
 			}
